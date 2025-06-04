@@ -1,40 +1,23 @@
 import os
-import json
 import argparse
 from datetime import datetime
 from typing import Dict, Any
 
 from crewai import Crew, Process, LLM
-from crewai.tools import tool, BaseTool
 from dotenv import load_dotenv
 
 from config import (
     DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_TOP_P,
     DEFAULT_BASE_URL, DEFAULT_TEMPLATE, DEFAULT_RPM,
-    RESULTS_DIR, MODELS, CONSOLE_SEPARATOR
+    MODELS
 )
 from agents import create_agents
 from tasks import create_brainstorm_tasks
 from templates import BRAINSTORM_TEMPLATES
+from utils import print_section, save_report
 
 # Load environment variables
 load_dotenv()
-
-def print_section(title: str):
-    """Print a section header"""
-    print(f"\n{title}")
-    print(CONSOLE_SEPARATOR)
-
-@tool
-def brainstorm_results(results: str) -> str:
-    """Saves and formats brainstorm session results"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = os.path.join(RESULTS_DIR, f"brainstorm_results_{timestamp}.txt")
-
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(results)
-
-    return f"Results saved to {filename}"
 
 
 class AIBrainstormCrew:
@@ -89,13 +72,10 @@ class AIBrainstormCrew:
 
         self.agents = {}
         self.tasks = []
-        self.results_tool: BaseTool = brainstorm_results
 
     def create_agents(self):
         """Create a team of agents with different roles"""
         self.agents = create_agents(self.llm, DEFAULT_RPM)
-        # Add results tool to evaluator
-        self.agents['evaluator'].tools = [self.results_tool]
 
     def create_brainstorm_tasks(self, topic: str, context: str = ""):
         """Create tasks for brainstorm on given topic"""
@@ -113,6 +93,7 @@ class AIBrainstormCrew:
 
         # Create and run crew
         crew = Crew(
+            name="Venice brainstorm",
             agents=list(self.agents.values()),
             tasks=self.tasks,
             process=Process.sequential,  # Sequential task execution
@@ -151,44 +132,6 @@ class AIBrainstormCrew:
                 report['task_results'].append(task_result)
 
         return report
-
-    def save_report(self, report: Dict[str, Any], filename: str = None):
-        """Save report to JSON file"""
-        # Create results directory if it doesn't exist
-        os.makedirs(RESULTS_DIR, exist_ok=True)
-
-        if not filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(RESULTS_DIR, f"venice_brainstorm_{timestamp}.json")
-
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(report, f, ensure_ascii=False, indent=2)
-
-        print(f"📁 Report saved: {filename}")
-
-        # Also save readable version
-        readable_filename = filename.replace('.json', '_readable.txt')
-        with open(readable_filename, 'w', encoding='utf-8') as f:
-            f.write(f"AI BRAINSTORM REPORT\n")
-            f.write(f"{CONSOLE_SEPARATOR}\n")
-            f.write(f"Topic: {report['topic']}\n")
-            f.write(f"Date: {report['timestamp']}\n")
-            f.write(f"{CONSOLE_SEPARATOR}\n\n")
-            f.write(report['final_result'])
-            f.write(f"\n\n{CONSOLE_SEPARATOR}\n")
-            f.write("TOKEN USAGE SUMMARY\n")
-            f.write(f"{CONSOLE_SEPARATOR}\n")
-            f.write(f"Total tokens: {report['token_usage'].get('total_tokens', 0)}\n")
-            f.write(f"Prompt tokens: {report['token_usage'].get('prompt_tokens', 0)}\n")
-            f.write(f"Completion tokens: {report['token_usage'].get('completion_tokens', 0)}\n")
-
-        print(f"📄 Readable version: {readable_filename}")
-
-        # Print token usage summary
-        print_section("📊 Token Usage Summary")
-        print(f"Total tokens: {report['token_usage'].get('total_tokens', 0)}")
-        print(f"Prompt tokens: {report['token_usage'].get('prompt_tokens', 0)}")
-        print(f"Completion tokens: {report['token_usage'].get('completion_tokens', 0)}")
 
 
 def main():
@@ -245,7 +188,7 @@ def main():
         )
 
         # Save results
-        brainstorm_crew.save_report(report)
+        save_report(report)
 
         print_section("🎉 BRAINSTORM COMPLETE")
         print("Check generated result files.")
