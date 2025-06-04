@@ -6,6 +6,9 @@ from typing import Dict, Any
 from crewai import Crew, Process, LLM
 from dotenv import load_dotenv
 
+# Disable telemetry
+os.environ["OTEL_SDK_DISABLED"] = "true"
+
 from config import (
     DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_TOP_P,
     DEFAULT_BASE_URL, DEFAULT_TEMPLATE, DEFAULT_RPM,
@@ -41,7 +44,7 @@ class AIBrainstormCrew:
             raise ValueError("API key not provided. Set it via api_key parameter or VENICE_API_KEY environment variable")
 
         # Get model from environment or parameter
-        self.model = model or os.getenv("VENICE_MODEL", DEFAULT_MODEL)
+        self.model = model or os.getenv("BRAINSTORM_MODEL", DEFAULT_MODEL)
         if not self.model:
             raise ValueError("Model not specified")
 
@@ -149,7 +152,7 @@ def main():
 
     # Print configuration
     print_section("🔧 Configuration")
-    print(f"Model: {args.model or os.getenv('VENICE_MODEL', DEFAULT_MODEL)}")
+    print(f"Model: {args.model or os.getenv('BRAINSTORM_MODEL', DEFAULT_MODEL)}")
     print(f"Temperature: {args.temperature or os.getenv('VENICE_TEMPERATURE', str(DEFAULT_TEMPERATURE))}")
     print(f"Top-p: {args.top_p or os.getenv('VENICE_TOP_P', str(DEFAULT_TOP_P))}")
     print(f"Base URL: {DEFAULT_BASE_URL}")
@@ -157,7 +160,7 @@ def main():
     # Initialize with Venice AI
     brainstorm_crew = AIBrainstormCrew(
         api_key=os.getenv("VENICE_API_KEY"),
-        model=args.model or os.getenv("VENICE_MODEL", DEFAULT_MODEL),
+        model=args.model or os.getenv("BRAINSTORM_MODEL", DEFAULT_MODEL),
         base_url=DEFAULT_BASE_URL,
         temperature=args.temperature,
         top_p=args.top_p
@@ -188,10 +191,10 @@ def main():
         )
 
         # Save results
-        save_report(report)
+        report_path = save_report(report)
 
         print_section("🎉 BRAINSTORM COMPLETE")
-        print("Check generated result files.")
+        print("Check generated result: \n", report_path)
 
     except Exception as e:
         print(f"❌ Error during brainstorm: {e}")

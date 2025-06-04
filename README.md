@@ -25,8 +25,8 @@ This project implements an AI-powered brainstorming system using the CrewAI fram
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/venticello/venice-brainstorm.git
+cd venice-brainstorm
 ```
 
 2. Install dependencies:
@@ -75,7 +75,7 @@ python brainstorm.py --topic "Your custom topic" --context "Additional context"
 
 You can configure the following settings in the `.env` file:
 - `VENICE_API_KEY`: Your Venice AI API key
-- `VENICE_MODEL`: Default model to use
+- `BRAINSTORM_MODEL`: AI model to use
 - `VENICE_TEMPERATURE`: Default temperature setting
 - `VENICE_TOP_P`: Default top-p setting
 

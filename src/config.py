@@ -6,7 +6,7 @@ DEFAULT_TEMPERATURE = 0.75
 DEFAULT_TOP_P = 0.9
 DEFAULT_BASE_URL = "https://api.venice.ai/api/v1"
 DEFAULT_TEMPLATE = "startup"
-DEFAULT_RPM = 20
+DEFAULT_RPM = 20 # for small models can be up to 50
 RESULTS_DIR = "results"
 
 # Available models

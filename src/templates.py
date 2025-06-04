@@ -10,7 +10,7 @@ BRAINSTORM_TEMPLATES = {
         'context': 'Focus on solutions that can be implemented within 2-3 years and will give measurable effect'
     },
     'education': {
-        'topic': 'Revolution in online education',
+        'topic': 'Revolution in online education with AI',
         'context': 'How to make distance learning more effective and engaging than traditional education'
     },
     'startup': {

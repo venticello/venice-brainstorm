@@ -8,20 +8,21 @@ def print_section(title: str):
     print(f" {title} ".center(50, "="))
     print("=" * 50 + "\n")
 
-def save_report(report: dict):
+def save_report(report: dict) -> str:
     """Save brainstorm report in JSON and readable formats"""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Create results directory if it doesn't exist
-    os.makedirs("results", exist_ok=True)
+    # Create results directory in project root if it doesn't exist
+    results_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "results")
+    os.makedirs(results_dir, exist_ok=True)
     
     # Save JSON report
-    json_path = f"results/venice_brainstorm_{timestamp}.json"
+    json_path = os.path.join(results_dir, f"venice_brainstorm_{timestamp}.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
     
     # Save readable report
-    txt_path = f"results/venice_brainstorm_{timestamp}_readable.txt"
+    txt_path = os.path.join(results_dir, f"venice_brainstorm_{timestamp}_readable.txt")
     with open(txt_path, "w", encoding="utf-8") as f:
         f.write(f"AI Brainstorm Report\n")
         f.write(f"===================\n\n")
@@ -45,4 +46,6 @@ def save_report(report: dict):
         f.write("-----------\n")
         f.write(f"Total Tokens: {report['token_usage']['total_tokens']}\n")
         f.write(f"Prompt Tokens: {report['token_usage']['prompt_tokens']}\n")
-        f.write(f"Completion Tokens: {report['token_usage']['completion_tokens']}\n") 
+        f.write(f"Completion Tokens: {report['token_usage']['completion_tokens']}\n")
+
+    return txt_path
