@@ -45,6 +45,7 @@ VENICE_API_KEY=your_api_key_here
 
 Run the script with a default template:
 ```bash
+cd src
 python brainstorm.py
 ```
 
@@ -52,6 +53,7 @@ python brainstorm.py
 
 Run with a custom topic:
 ```bash
+cd src
 python brainstorm.py --topic "Your custom topic" --context "Additional context"
 ```
 
@@ -91,17 +93,24 @@ The reports include:
 
 ## Project Structure
 
-- `brainstorm.py`: Main script
-- `agents.py`: Agent definitions
-- `tasks.py`: Task definitions
-- `templates.py`: Ready-made templates
-- `config.py`: Configuration settings
-- `requirements.txt`: Project dependencies
-- `results/`: Directory for output files
+```
+.
+├── src/
+│   ├── brainstorm.py    # Main script
+│   ├── agents.py        # Agent definitions
+│   ├── tasks.py         # Task definitions
+│   ├── templates.py     # Ready-made templates
+│   ├── config.py        # Configuration settings
+│   └── utils.py         # Utility functions
+├── results/             # Directory for output files
+├── requirements.txt     # Project dependencies
+└── README.md           # This file
+```
 
 ## Example
 
 ```bash
+cd src
 python brainstorm.py --template startup
 ```
 
