@@ -1,7 +1,7 @@
 """Configuration settings for the brainstorm application"""
 
 # Default settings
-DEFAULT_MODEL = "openai/o1" # venice "llama-3.1-405b"
+DEFAULT_MODEL = "openai/gpt-4.1" # venice "qwen3-235b"
 DEFAULT_TEMPERATURE = 0.75
 DEFAULT_TOP_P = 0.9
 DEFAULT_BASE_URL = "https://api.venice.ai/api/v1"
