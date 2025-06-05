@@ -30,6 +30,7 @@ def save_report(report: dict) -> str:
         if report['context']:
             f.write(f"Context: {report['context']}\n")
         f.write(f"Timestamp: {report['timestamp']}\n")
+        f.write(f"Venice model: {report['model']}\n")
         f.write(f"Agents Used: {', '.join(report['agents_used'])}\n\n")
         
         f.write("Task Results\n")

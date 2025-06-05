@@ -10,9 +10,9 @@ from dotenv import load_dotenv
 os.environ["OTEL_SDK_DISABLED"] = "true"
 
 from config import (
-    DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_TOP_P,
+    DEFAULT_MODEL, DEFAULT_TEMPERATURE,
     DEFAULT_BASE_URL, DEFAULT_TEMPLATE, DEFAULT_RPM,
-    MODELS
+    MODELS,MODELS_CONTEXT
 )
 from agents import create_agents
 from tasks import create_brainstorm_tasks
@@ -36,7 +36,7 @@ class AIBrainstormCrew:
             model: Model to use
             base_url: Base URL for Venice AI API
             temperature: Temperature parameter for LLM (0.0 to 1.0)
-            top_p: Top-p parameter for LLM (0.0 to 1.0)
+            top_p: Optional top-p parameter for LLM (0.0 to 1.0)
         """
         # Get API key from environment or parameter
         self.api_key = api_key or os.getenv("VENICE_API_KEY")
@@ -54,22 +54,24 @@ class AIBrainstormCrew:
             raise ValueError("Temperature must be between 0 and 1")
 
         # Get top_p from environment or parameter
-        self.top_p = top_p or float(os.getenv("VENICE_TOP_P", str(DEFAULT_TOP_P)))
-        if not 0 <= self.top_p <= 1:
-            raise ValueError("Top-p must be between 0 and 1")
+        self.top_p = top_p or os.getenv("VENICE_TOP_P")
+        if self.top_p is not None:
+            self.top_p = float(self.top_p)
+            if not 0 <= self.top_p <= 1:
+                raise ValueError("Top-p must be between 0 and 1")
 
         # Check model availability
         if self.model not in MODELS:
             raise ValueError(f"Unsupported model: {self.model}. Available models: {', '.join(MODELS)}")
-
         try:
             self.llm = LLM(
-                model=self.model,
+                model=f"openai/{self.model}",
                 temperature=self.temperature,
                 top_p=self.top_p,
                 base_url=base_url,
-                api_key=self.api_key
+                api_key=self.api_key,
             )
+            self.llm.context_window_size = MODELS_CONTEXT.get(self.model, 0)
         except Exception as e:
             raise RuntimeError(f"Error initializing LLM: {str(e)}")
 
@@ -100,7 +102,8 @@ class AIBrainstormCrew:
             agents=list(self.agents.values()),
             tasks=self.tasks,
             process=Process.sequential,  # Sequential task execution
-            verbose=True
+            verbose=True,
+            # output_log_file=True
         )
 
         # Execute brainstorm
@@ -121,7 +124,8 @@ class AIBrainstormCrew:
             'agents_used': list(self.agents.keys()),
             'final_result': str(result),
             'task_results': [],
-            'token_usage': usage_metrics
+            'token_usage': usage_metrics,
+            'model': self.model
         }
 
         # Collect results of each task
@@ -145,7 +149,7 @@ def main():
     parser.add_argument('--template', type=str, choices=list(BRAINSTORM_TEMPLATES.keys()),
                        default=DEFAULT_TEMPLATE, help='Template to use if no custom topic provided')
     parser.add_argument('--temperature', type=float, help='Temperature parameter for LLM (0.0 to 1.0)')
-    parser.add_argument('--top-p', type=float, help='Top-p parameter for LLM (0.0 to 1.0)')
+    parser.add_argument('--top-p', type=float, help='Optional top-p parameter for LLM (0.0 to 1.0)')
     parser.add_argument('--model', type=str, help='Model to use')
     
     args = parser.parse_args()
@@ -154,7 +158,8 @@ def main():
     print_section("🔧 Configuration")
     print(f"Model: {args.model or os.getenv('BRAINSTORM_MODEL', DEFAULT_MODEL)}")
     print(f"Temperature: {args.temperature or os.getenv('VENICE_TEMPERATURE', str(DEFAULT_TEMPERATURE))}")
-    print(f"Top-p: {args.top_p or os.getenv('VENICE_TOP_P', str(DEFAULT_TOP_P))}")
+    if args.top_p or os.getenv("VENICE_TOP_P"):
+        print(f"Top-p: {args.top_p or os.getenv('VENICE_TOP_P')}")
     print(f"Base URL: {DEFAULT_BASE_URL}")
 
     # Initialize with Venice AI
