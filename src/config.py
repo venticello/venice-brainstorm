@@ -20,10 +20,7 @@ MODELS_CONTEXT = {
   "llama-3.1-405b": 65536,
   "dolphin-2.9.2-qwen2-72b": 32768,
   "qwen-2.5-vl": 32768,
-  "qwen-2.5-coder-32b": 32768,
   "deepseek-r1-671b": 131072,
-  "deepseek-coder-v2-lite": 131072,
-  # "nemotron-8b-ultralong-1M": 1024000
 }
 # Available models
 MODELS = MODELS_CONTEXT.keys()
